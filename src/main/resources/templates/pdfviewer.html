@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Viewer</title>
+</head>
+<body>
+<h1>PDF Viewer</h1>
+<iframe th:src="@{/pdf}" style="width:100%;height:800px;"></iframe>
+<br>
+<a th:href="@{/download/pdf}" class="btn btn-primary">Download PDF</a>
+</body>
+</html>
