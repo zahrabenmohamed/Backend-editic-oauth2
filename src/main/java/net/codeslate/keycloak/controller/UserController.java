@@ -1,6 +1,10 @@
 package net.codeslate.keycloak.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -14,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.file.Files;
 
 
 @Controller
@@ -22,51 +27,45 @@ public class UserController {
     @Autowired
     private OAuth2AuthorizedClientService authorizedClientService;
 
-    @GetMapping({"index"})
+    @GetMapping({"pdfviewer"})
     public String getIndex(Model model, @AuthenticationPrincipal OAuth2User principal, OAuth2AuthenticationToken authentication) {
         OAuth2AuthorizedClient authorizedClient = this.getAuthorizedClient(authentication);
-        model.addAttribute("userName",authentication.getPrincipal().getAttribute("preferred_username"));
-        model.addAttribute("clientName",authorizedClient.getClientRegistration().getClientId());
-        return "";
+        return "pdfviewer";
 
     }
+    @GetMapping("/pdf")
+    public ResponseEntity<byte[]> displayPdf() throws IOException {
+        ClassPathResource pdfFile = new ClassPathResource("static/pdfs/invoice.pdf");
+        byte[] pdfBytes = Files.readAllBytes(pdfFile.getFile().toPath());
 
-    @GetMapping("/pdfviewer")
-    public String showPdfViewer(@RequestParam("documentUrl") String documentUrl, Model model) {
-        model.addAttribute("documentUrl", documentUrl);
-        return "index";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("inline", "pdf.pdf");
+        headers.setCacheControl("must-revalidate, no-store");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .body(pdfBytes);
     }
 
-    @GetMapping("/download")
-    public void downloadDocument(@RequestParam("documentUrl") String documentUrl, HttpServletResponse response) {
-        // Logic to download the document
-        // You can use libraries like Apache HttpClient to fetch the document from the provided URL
-        // Then, set the response headers and write the document content to the response output stream
-        // For brevity, this example assumes you have already fetched the document and have it as a byte array
 
-        byte[] documentContent = fetchDocumentContent(documentUrl);
+    @GetMapping("/download/pdf")
+    public ResponseEntity<byte[]> downloadPdf() throws IOException {
+        ClassPathResource pdfFile = new ClassPathResource("static/pdfs/zahra.pdf");
+        byte[] pdfBytes = Files.readAllBytes(pdfFile.getFile().toPath());
 
-        response.setContentType("application/pdf");
-        response.setHeader("Content-Disposition", "attachment; filename=test.pdf");
-        response.setContentLength(documentContent.length);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "invoice.pdf");
+        headers.setCacheControl("must-revalidate, no-store");
 
-        try {
-            ServletOutputStream outputStream = response.getOutputStream();
-            outputStream.write(documentContent);
-            outputStream.flush();
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .body(pdfBytes);
     }
 
-    private byte[] fetchDocumentContent(String documentUrl) {
-        // Implement the logic to fetch the document content from the provided URL
-        // You can use libraries like Apache HttpClient to make the HTTP request and obtain the document content
-
-        // For demonstration purposes, this example simply returns a placeholder byte array
-        return "This is a placeholder document content".getBytes();
-    }
 
     private OAuth2AuthorizedClient getAuthorizedClient(OAuth2AuthenticationToken authentication) {
         return this.authorizedClientService.loadAuthorizedClient(
