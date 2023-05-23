@@ -32,14 +32,6 @@ public class AlfrescoController {
 
 
 
-    /****************PDF VIEWER********************************/
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/pdfviewer")
-    public String pdfViewer(Model model) {
-        // Add any necessary data to the model
-        return "pdfviewer.html";
-    }
-
     /*******************Download REST API***********************/
 
     @GetMapping(value = "/download-document/{nodeId}", produces = MediaType.APPLICATION_PDF_VALUE)

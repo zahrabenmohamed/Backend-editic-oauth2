@@ -2,6 +2,8 @@ server:
   port: 8081
 
 
+
+
 logging:
   level:
     root: INFO
@@ -11,6 +13,23 @@ logging:
     org.springframework.web.client.RestTemplate: DEBUG
 
 spring:
+  spring:
+    mail:
+      host: smtp.example.com #your SMTP server hostname
+      port: 587 #SMTP server port number
+      username: zahra.benmohamed.etu20@ensem.ac.ma
+      password: baiuredoxcahkxum
+      protocol: smtp #SMTP protocol
+      properties:
+        mail:
+          smtp:
+            auth: true
+            starttls:
+              enable: true
+
+      resources:
+        static-locations: classpath:/static/
+
   thymeleaf:
     cache: false
   security:
